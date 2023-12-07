@@ -1,14 +1,24 @@
 #-*-Makefile-*-
 
-FC = gfortran
-FOPT = -o2 -fopenmp
-FFLAGS = -fdefault-real-8 -fdefault-double-8 -cpp -ffree-line-length-none -Wall
+COMP = gnu
 
-FFTW_INC = -I /usr/include
-FFTW_LIB = -L /usr/lib/x86_64-linux-gnu
-BLAS_LIB = -L /usr/lib/x86_64-linux-gnu/blas
-LAPACK_LIB = -L /usr/lib/x86_64-linux-gnu/lapack
-LIBS = -lfftw3_omp -lfftw3 -llapack -lblas -lm
+ifeq ($(COMP),gnu)
+	#GNU compiler
+	FC = gfortran
+	FOPT = -o2 -fopenmp
+	FFLAGS = -fdefault-real-8 -fdefault-double-8 -cpp -ffree-line-length-none -Wall
+	FFTW_INC = -I /usr/include
+	FFTW_LIB = -L /usr/lib/x86_64-linux-gnu
+	BLAS_LIB = -L /usr/lib/x86_64-linux-gnu/blas
+	LAPACK_LIB = -L /usr/lib/x86_64-linux-gnu/lapack
+	LIBS = -lfftw3_omp -lfftw3 -llapack -lblas -lm
+else ifeq ($(COMP),intel)
+	#Intel Compiler
+	FC = ifort
+	FOPT = -O2 -qopenmp #-xHost -ipo #-parallel
+	FFLAGS = -r8 -fpp -qopenmp -traceback -check all -check noarg_temp_created
+	LIBS = -lfftw3_omp -lfftw3 -mkl
+endif
 
 CORR = butcher_table.o gl_integrator.o newton_root.o util.o potential.o eom_bg_cosmic.o eom_pert_cosmic.o corr_cosmic.o corr_mod.o
 OBJS = fftw_mod.o params.o vars.o grv_mod.o lin_tran.o nlin_tran.o io_mod.o spec_init.o $(CORR)
