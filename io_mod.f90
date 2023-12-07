@@ -42,7 +42,8 @@ contains
     open(unit=n_file_temp, file=tran_f, status="old")
     ! read transfer function
     do i=1, nrow
-       read(n_file_temp, '(1(ES22.15, 2X))') tk(i)
+!       read(n_file_temp, '(1(ES22.15, 2X))') tk(i)
+       read(n_file_temp, *) tk(i)
     end do
     close(unit=n_file_temp)
   end subroutine read_transfer
