@@ -1,7 +1,7 @@
 readme.txt
 
 Readme file for fld_gen.
-This is a program to generate fields using a combination of transfer functions and pointwise nonlinear functions. There is not currently support for general nonlinear functions of the field.
+This is a program to generate fields using a combination of (Fourier space) transfer functions and pointwise nonlinear functions. There is not currently support for general nonlinear functions of the field.
 
 Files
 ------------------
@@ -21,8 +21,14 @@ gl_integrator.f90    - GL integrator
 butcher_table.f90
 gl_macros.h
 
-params.f90
+params.f90           - Has parameters for the lattice
 macros.h
+vars.f90             - Field variables and initializers
 
 Makefile
 
+Outputs
+------------------
+gfld*.out            - Binary file of initial Gaussian field
+ngfld*.out           - Binary file after initial Gaussian field has gone through a nonlinear transform
+ngtfld*.out          - Binary file after nonGaussian field has gone through a linear transform

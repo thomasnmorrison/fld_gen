@@ -2,7 +2,9 @@
 
 module io_mod
 #include "macros.h"
+  use, intrinsic :: iso_c_binding
   use params
+  use vars
 
   implicit none
 
@@ -19,12 +21,11 @@ module io_mod
 contains
 
   ! Subroutine to initialize putput files
-  ! to do: choose file names
   subroutine init_output(seed_in)
     integer, intent(in) :: seed_in
     character(len=64) :: ri_char
 
-    write(ri_char,'(A, I3.3)') run_ident, seed_in
+    write(ri_char,'(A, I3.3)') run_id, seed_in
     open(unit=n_file_g, file="gfld"//trim(ri_char)//".out", form="unformatted",access="stream")
     open(unit=n_file_ng, file="ngfld"//trim(ri_char)//".out", form="unformatted",access="stream")
     open(unit=n_file_ngt, file="ngtfld"//trim(ri_char)//".out", form="unformatted",access="stream")
@@ -41,7 +42,7 @@ contains
     open(unit=n_file_temp, file=tran_f, status="old")
     ! read transfer function
     do i=1, nrow
-       read(tran_f, ) tk(i)
+       read(n_file_temp, '(1(ES22.15, 2X))') tk(i)
     end do
     close(unit=n_file_temp)
   end subroutine read_transfer

@@ -2,6 +2,7 @@
 
 module spec_init
 #include "macros.h"
+  use fftw3
   use params
   use grv_mod
 
@@ -51,7 +52,7 @@ contains
                 spec_interp = (1._dl + l - rad*kos)*spec(l) + (rad*kos - l)*spec(l+1)   ! interpolate spec
              endif
              grv(:) = get_grv_complex(1)
-             fk(LATIND) = spec_interp*grv(:)*filt(dk*rad, kfilt)  ! initialize mode
+             fk(LATIND) = spec_interp*grv(1)*filt(dk*rad, kfilt)  ! initialize mode
           end do
        end do
     end do

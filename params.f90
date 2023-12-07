@@ -16,5 +16,7 @@ module params
   real(dl), parameter :: len = 2._dl
   real(dl), parameter :: dx = len/dble(nx)
   real(dl), parameter :: dk = twopi / len
-  
+
+  integer, parameter :: nfld = 2
+  real(dl), parameter :: mpl = 1.e-5
 end module params

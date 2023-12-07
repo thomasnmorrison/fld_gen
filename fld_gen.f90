@@ -5,30 +5,33 @@
 
 program fld_gen
 #include "macros.h"
+#include "pert_macros.h"
   use params
+  use vars
   use fftw3
   use lin_tran
   use nlin_tran
   use spec_init
   use corr_mod
+  use io_mod
   use omp_lib
   
   implicit none
 
   integer :: seed
   
-  ! field variables
-  real(dl), allocatable :: fld(:,:,:)     ! Make this an allocatable array
-
   ! spec and transfer variables
   integer, parameter :: kos_spec = kos, kos_tk = 2**0
-  real(dl), dimension(nn*kos_spec) :: tk             ! transfer function
-  real(dl), dimension(nn*kos_tk) :: spec
+  real(dl), dimension(nn*kos_tk) :: tk             ! transfer function
+  real(dl), dimension(nn*kos_spec) :: spec
   
-  ! fft variables
-  real(C_DOUBLE), pointer :: f(:,:,:)
-  complex(C_DOUBLE_COMPLEX), pointer :: Fk(:,:,:)
-  type(C_PTR) :: planf, planb
+  ! Lattice initialization variables
+  real(dl), parameter, dimension(SYS_DIM_BG) :: y_bg0 = (/0._dl,0._dl,11._dl,0._dl,-0.8129_dl,0._dl/) ! ICs of bg
+  real(dl), parameter :: h_fac = 5._dl       ! ln(k/aH) at which to to init modes
+  real(dl), parameter :: alpha_init = 0._dl  ! \alpha when \phi = phi_init
+  real(dl), parameter :: phi_init = phi_p + phi_w
+  real(dl), parameter :: alpha_fin = 0._dl   ! \alpha when corr is set
+  real(dl), dimension(2) :: k_filter = dk*(/dble(nn-1)/2._dl, 2._dl*dble(nn-1)/3._dl/)  ! k's for the filter function
 
   integer :: terror
 
@@ -48,13 +51,12 @@ program fld_gen
   case(1)
      call init_corr(y_bg0, alpha_init, phi_init, alpha_fin, h_fac)  ! calculate corr
      spec = corr(:,2,2)  ! get spec for \langle |\chi|^2 \rangle
-  case(default)
-     print*, "Error"
-     exit
+  case default
+     stop "ERROR: SPECOPT INVALID"
   end select
 
   ! initialize Gaussian field
-  call lat_init_spec(corr, bowler_hat_cubic, kos, nkos-1, k_filter, seed, f1, FK, planb, corr_norm)  
+  call lat_init_spec(spec, bowler_hat_cubic, kos, nn-1, k_filter, seed, f, FK, planb, corr_norm)  
   call write_fld(n_file_g, f)  ! output Gaussian field
 
   ! nonlin transfer
@@ -63,45 +65,38 @@ program fld_gen
   
   ! lin transfer
   call read_transfer(tk, nn*kos_tk)
-  call lin_transfer(tk, kos_tk, kcut, f, fk, planf, planb)
+  call lin_transfer((/nx,ny,nz/), tk, kos_tk, int(k_filter(2)), f, fk, planf, planb)
   call write_fld(n_file_ngt, f)  ! output lin transfered field
   
   ! output settings
   call write_header(n_file_temp)
   
 contains
-
-  subroutine init_arrays()
-    allocate(fld(nx,ny,nz))
-    call allocate_3d_array(nx, ny, nz, f, fk)
-    planf = fftw_plan_dft_r2c_3d(nz, ny, nx, laplace, Fk, FFTW_MEASURE+FFTW_DESTROY_INPUT) 
-    planb = fftw_plan_dft_c2r_3d(nz, ny, nx, Fk, laplace, FFTW_MEASURE+FFTW_DESTROY_INPUT) 
-  end subroutine init_arrays
-
+  
   subroutine write_header(nfile)
     integer, intent(in) :: nfile
 
     open(unit=nfile, file=header_f)
-    write(nfile, ) "SPECOPT: ", SPEC_OPT
-    select case(SPEC_OPT)
+    write(nfile, '(A, 2X, I5, 2X)') "SPECOPT: ", SPECOPT
+    select case(SPECOPT)
     case(1)
-       write(nfile, ) "y_bg0: ",
-       write(nfile, ) "h_fac: ",
-       write(nfile, ) "alpha_init: ",
-       write(nfile, ) "alpha_fin: ",
-       write(nfile, ) "phi_init: ",
+       write(nfile, '(A, 2X, 30(ES22.15, 2X))') "y_bg0: ", y_bg0
+       write(nfile, '(A, 2X, 1(ES22.15, 2X))') "h_fac: ", h_fac
+       write(nfile, '(A, 2X, 1(ES22.15, 2X))') "alpha_init: ", alpha_init
+       write(nfile, '(A, 2X, 1(ES22.15, 2X))') "alpha_fin: ", alpha_fin
+       write(nfile, '(A, 2X, 1(ES22.15, 2X))') "phi_init: ", phi_init
     end select
     
-    write(nfile, ) "POTOPT: ", POTOPT
+    write(nfile, '(A, 2X, I5, 2X)') "POTOPT: ", POTOPT
     select case(POTOPT)
     case(5)
-
+       
     end select
     
-    write(nfile, ) "spec_f: ", spec_f
-    write(nfile, ) "tran_f: ", tran_f
-    write(nfile, ) "kos_spec: ", kos_spec
-    write(nfile, ) "kos_tk: ", kos_tk
+    write(nfile, '(2(A, 2X))') "spec_f: ", spec_f
+    write(nfile, '(2(A, 2X))') "tran_f: ", tran_f
+    write(nfile, '(A, 2X, I5, 2X)') "kos_spec: ", kos_spec
+    write(nfile, '(A, 2X, I5, 2X)') "kos_tk: ", kos_tk
     close(unit=nfile)
   end subroutine write_header
   
