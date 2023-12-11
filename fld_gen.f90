@@ -18,7 +18,7 @@ program fld_gen
   
   implicit none
 
-  integer :: seed
+  integer :: seed = 0
   
   ! spec and transfer variables
   integer, parameter :: kos_spec = kos, kos_tk = 2**0
@@ -65,7 +65,7 @@ program fld_gen
   
   ! lin transfer
   call read_transfer(tk, nn*kos_tk)
-  call lin_transfer((/nx,ny,nz/), tk, kos_tk, int(k_filter(2)), f, fk, planf, planb)
+  call lin_transfer((/nx,ny,nz/), tk, kos_tk, int(k_filter(2)/dk), f, fk, planf, planb)
   call write_fld(n_file_ngt, f)  ! output lin transfered field
   
   ! output settings

@@ -8,10 +8,10 @@ module io_mod
 
   implicit none
 
-  character(len=*), parameter :: run_id = ""
+  character(len=*), parameter :: run_id = "_128_5_513s010"
   character(len=*), parameter :: spec_f = ""
-  character(len=*), parameter :: tran_f = ""
-  character(len=*), parameter :: header_f = ""
+  character(len=*), parameter :: tran_f = "transfer_128_5_513s010.out"
+  character(len=*), parameter :: header_f = "genmock_header.out"
   
   integer, parameter :: n_file_temp = 99
   integer, parameter :: n_file_g = 98     ! Gaussian field

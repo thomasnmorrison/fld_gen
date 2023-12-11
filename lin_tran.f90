@@ -30,7 +30,7 @@ contains
     call fftw_execute_dft_r2c(planf, f, fk)
     
     ! loop over wave numbers
-!$OMP PARALLEL DO PRIVATE(ii,jj,kk,l,t_interp,rad) FIRSTPRIVATE(n1,n2,n3,nn3,nn2,nn1,kos)
+!$OMP PARALLEL DO PRIVATE(i,j,k,ii,jj,kk,l,t_interp,rad) FIRSTPRIVATE(n1,n2,n3,nn3,nn2,nn1,kos,kcut)
     do k=1,nz; if (k>nn3) then; kk = k - (n3+1); else; kk=k-1; endif
        do j=1,ny; if (j>nn2) then; jj = j - (n2+1); else; jj=j-1; endif 
           do i=1,nn1; ii=i-1

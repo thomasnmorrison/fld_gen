@@ -55,7 +55,7 @@ contains
             SYS_DIM_BG, eps_0, c_max_0)
        if (y_pert(3) .lt. phi_init) exit
     end do
-    call gl_newton_root(y_pert(SYS_BG_I), deriv_bg_cosm, get_phi, get_dphi, phi_init, z(SYS_BG_I), g, dt, &
+    call gl_newton_root(y_pert(SYS_BG_I), deriv_bg_cosm, get_phi, get_dphi, phi_init, z(SYS_BG_I), g(:,SYS_BG_I,:), dt, &
          SYS_DIM_BG, eps_0, c_max_0, eps_0, c_max_0/4)
     ! set y_init with \alpha = \alpha_{init} when \phi = \phi_{init}
     y_init = y_bg0
@@ -75,7 +75,7 @@ contains
                SYS_DIM_BG, eps_0, c_max_0)
           if (get_hor(y_pert) .gt. 0.5_dl*log(k2)-h_fac) exit
        end do
-       call gl_newton_root(y_pert(SYS_BG_I), deriv_bg_cosm, get_hor, get_dhor, 0.5_dl*log(k2)-h_fac, z(SYS_BG_I), g, dt, &
+       call gl_newton_root(y_pert(SYS_BG_I), deriv_bg_cosm, get_hor, get_dhor, 0.5_dl*log(k2)-h_fac, z(SYS_BG_I), g(:,SYS_BG_I,:), dt, &
             SYS_DIM_BG, eps_0, c_max_0, eps_0, c_max_0/2)
        y_init(:) = y_pert(SYS_BG_I)
      
